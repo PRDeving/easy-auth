@@ -1,0 +1,41 @@
+{
+  "name": "easy-auth",
+  "version": "1.0.0",
+  "description": "Easy-Auth is a minimalistic utility designed to streamline user/password authentication in node applications. With a focus on simplicity and flexibility, it supports cookie and bearer JWT auth, providing a hook for user repository integration during the authentication lifecycle. Ideal for developers looking to implement secure authentication with minimal code.",
+  "keywords": [
+    "authentication",
+    "authorization",
+    "JWT",
+    "JSON Web Token",
+    "cookie auth",
+    "bearer token",
+    "user authentication",
+    "password authentication",
+    "express middleware",
+    "session management",
+    "user repository",
+    "auth hook"
+  ],
+  "author": "PRDeving <pablo.deving@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PRDeving/easy-auth.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PRDeving/easy-auth/issues"
+  },
+  "homepage": "https://github.com/PRDeving/easy-auth#readme",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
