@@ -19,6 +19,7 @@ const EasyAuth = (config) => ({
 
         res.cookie('eat', fresh, {
             maxAge: config.ttl || 1000 * 60 * 60 * 24,
+            ...(config.domain ? { domain: config.domain } : {}),
             httpOnly: true,
         })
         next()
@@ -41,6 +42,7 @@ const EasyAuth = (config) => ({
             token,
             session: (res) => res?.cookie('eat', token, {
                 maxAge: config.ttl || 1000 * 60 * 60 * 24,
+                ...(config.domain ? { domain: config.domain } : {}),
                 httpOnly: true,
             }),
         }
