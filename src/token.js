@@ -1,21 +1,17 @@
 import jwt from 'jsonwebtoken'
 
 export const generateToken = (data, config) => new Promise((res) => res(jwt.sign(data, config.secret, {
-    expiresIn: config.expiresIn,
+    expiresIn: config.ttl,
     audience: config.audience,
     issuer: config.issuer,
 })))
 
-export const verifyToken = (token, config) => new Promise((res) => {
+export const verifyToken = (token, config) => new Promise((res, rej) => {
     jwt.verify(token, config.secret,{
         audience: config.audience,
         issuer: config.issuer,
     }, (err, decoded) => {
-        if (err) return res(null)
-        delete decoded['iat']
-        delete decoded['exp']
-        delete decoded['aud']
-        delete decoded['iss']
+        if (err) return rej(err)
         return res(decoded)
     })
 })

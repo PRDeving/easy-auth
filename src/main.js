@@ -1,51 +1,52 @@
+import defaultConfig from './defaultConfig.js'
+
 import { generateToken, verifyToken } from './token.js'
 import { generateAuthphrase } from './auth.js'
+import cookie from './cookie.js'
 
-const EasyAuth = (config) => ({
-    validateSession: async (token) => verifyToken(token, config),
-    SessionMiddleware: async (req, res, next) => {
-        const tokenStr = req.cookies?.eat || req.headers.authorization
-        if (!tokenStr) return next()
-        const token = (tokenStr.startsWith('Bearer')) ? tokenStr.split(' ')[1] : tokenStr
+import Middleware from './middleware.js'
+import Router from './router.js'
 
-        req.session = await verifyToken(token, config)
+const EasyAuth = (_config) => {
+    const config = { ...defaultConfig, ..._config, ...process.env }
 
-        const fresh = await generateToken(req.session, {
-            secret: config.secret,
-            expiresIn: config.ttl || 1000 * 60 * 60 * 24,
-            audience: config.name || 'easy-auth',
-            issuer: 'easy-auth',
-        })
+    return ({
+        generateAuthphrase: (identifier, password) => generateAuthphrase(identifier, password, config.secret)
 
-        res.cookie('eat', fresh, {
-            maxAge: config.ttl || 1000 * 60 * 60 * 24,
-            ...(config.domain ? { domain: config.domain } : {}),
-            httpOnly: true,
-        })
-        next()
-    },
+        validateSession: async (token) => verifyToken(token, config),
+        SessionMiddleware: Middleware(config),
+        Router: Router(config),
 
-    credentialsAuth: async (identifier, password) => {
-        const authphrase = generateAuthphrase(identifier, password, config.secret)
-        const data = await config.onAuth(authphrase)
-        if (!data) return null
+        Create: async (identifier, password, data) => {
+            const authphrase = generateAuthphrase(identifier, password, config.secret)
+            const exists = await config.onAuth(authphrase)
+            if (!!exists) return false
 
-        const token = await generateToken(data, {
-            secret: config.secret,
-            expiresIn: config.ttl || 1000 * 60 * 60 * 24,
-            audience: config.name || 'easy-auth',
-            issuer: 'easy-auth',
-        })
+            return config.onCreate(authphrase, data)
+        },
 
-        return {
-            data,
-            token,
-            session: (res) => res?.cookie('eat', token, {
-                maxAge: config.ttl || 1000 * 60 * 60 * 24,
-                ...(config.domain ? { domain: config.domain } : {}),
-                httpOnly: true,
-            }),
+        Auth: async (identifier, password) => {
+            const authphrase = generateAuthphrase(identifier, password, config.secret)
+            const data = await config.onAuth(authphrase)
+            if (!data) return false
+
+            return data
         }
-    }
-})
+
+        Session: async (data) => {
+            const token = await generateToken(data, {
+                secret: config.secret,
+                expiresIn: config.ttl,
+                audience: config.name,
+                issuer: config.issuer,
+            })
+
+            return {
+                data,
+                token,
+                session: (res) => cookie(res, token, config),
+            }
+        }
+    })
+}
 export default EasyAuth
