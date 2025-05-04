@@ -12,7 +12,8 @@ export default (config) => async (req, res, next) => {
         const timeSinceIssued = now - decoded.iat;
 
         if (timeSinceIssued > config.refresh && timeSinceIssued < config.ttl) {
-            const fresh = await generateToken(req.session, {
+            const { exp, iss, aud, iat, ...rest } = decoded
+            const fresh = await generateToken(rest, {
                 secret: config.secret,
                 expiresIn: config.ttl,
                 audience: config.audience,
