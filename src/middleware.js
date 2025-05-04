@@ -23,7 +23,7 @@ export default (config) => async (req, res, next) => {
             cookie(res, fresh, config)
         }
 
-        req.session = decoded
+        req.session = rest
     } catch(error) {
         return res.status(401).json({ error: 'Invalid token' });
     }
