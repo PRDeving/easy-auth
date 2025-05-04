@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 export const generateToken = (data, config) => new Promise((res) => res(jwt.sign(data, config.secret, {
-    expiresIn: config.ttl,
+    expiresIn: config.expiresIn,
     audience: config.audience,
     issuer: config.issuer,
 })))
