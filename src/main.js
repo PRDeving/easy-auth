@@ -11,8 +11,7 @@ const EasyAuth = (_config) => {
     const config = { ...defaultConfig, ..._config, ...process.env }
 
     return ({
-        generateAuthphrase: (identifier, password) => generateAuthphrase(identifier, password, config.secret)
-
+        generateAuthphrase: (identifier, password) => generateAuthphrase(identifier, password, config.secret),
         validateSession: async (token) => verifyToken(token, config),
         SessionMiddleware: Middleware(config),
         Router: Router(config),
@@ -31,7 +30,7 @@ const EasyAuth = (_config) => {
             if (!data) return false
 
             return data
-        }
+        },
 
         Session: async (data) => {
             const token = await generateToken(data, {
