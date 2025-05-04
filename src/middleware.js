@@ -7,12 +7,11 @@ export default (config) => async (req, res, next) => {
     const token = (tokenStr.startsWith('Bearer')) ? tokenStr.split(' ')[1] : tokenStr
 
     try {
-        const decoded = await verifyToken(token, config)
+        const { exp, iss, aud, iat, ...rest } = await verifyToken(token, config)
         const now = Date.now() / 1000;
-        const timeSinceIssued = now - decoded.iat;
+        const timeSinceIssued = now - iat;
 
         if (timeSinceIssued > config.refresh && timeSinceIssued < config.ttl) {
-            const { exp, iss, aud, iat, ...rest } = decoded
             const fresh = await generateToken(rest, {
                 secret: config.secret,
                 expiresIn: config.ttl,
