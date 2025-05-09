@@ -3,10 +3,15 @@ import request from 'supertest'
 
 import authRouter from './router.js'
 import { generateToken, verifyToken, generateAuthphrase } from './token.js'
+import { sanitizeInput } from './sanitize.js'
 
 jest.mock('./token.js', () => ({
     generateToken: jest.fn(),
     generateAuthphrase: jest.fn(),
+}))
+
+jest.mock('./sanitize.js', () => ({
+    sanitizeInput: jest.fn(input => input),
 }))
 
 it('debe responder con un token para una autenticación exitosa', async () => {

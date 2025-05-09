@@ -26,15 +26,20 @@ const easyAuth = EasyAuth({
 
 ### generateAuthphrase(identifier, password)
 
-Generates an authentication phrase from identifier (usually username or email) and password.
+Generates an authentication phrase from identifier (usually username or email) and password. Validates input against the configured inputPattern before processing.
 
 ```javascript
-const authphrase = easyAuth.generateAuthphrase('user@example.com', 'password123');
+try {
+  const authphrase = easyAuth.generateAuthphrase('user@example.com', 'password123');
+} catch (error) {
+  // Handle invalid input format
+  console.error('Invalid input format');
+}
 ```
 
 ### validateSession(token)
 
-Validates a JWT token and returns the decoded payload if valid.
+Validates a JWT token and returns the decoded payload if valid. Validates the token against the configured inputPattern before processing.
 
 ```javascript
 const sessionData = await easyAuth.validateSession(token);
@@ -42,7 +47,7 @@ if (sessionData) {
   // Token is valid
   console.log(sessionData);
 } else {
-  // Token is invalid
+  // Token is invalid or doesn't match the input pattern
 }
 ```
 
