@@ -1,102 +1,151 @@
 # EASY-AUTH
 
-Easy-Auth is a lightweight boilerplate utility library to manage user/password authentication with as little code as possible.
+Easy-Auth is a lightweight authentication library for Node.js applications that simplifies user authentication using passwords. It provides a flexible and configurable system for handling authentication tokens, sessions, and user management.
 
-Easy-Auth is based on cookie and bearer JWT auth, supporting both.
+Easy-Auth is based on cookie and bearer JWT auth, supporting both methods for maximum flexibility.
 
-Users and Auth repositories are in the clients control, Easy-Auth provides a hook to look for users in the auth lifecycle.
+Users and Auth repositories are in the client's control, Easy-Auth provides hooks to integrate with your user storage during the authentication lifecycle.
 
-# How to use Easy Auth
+## Installation
+
+```
+npm install easy-auth
+```
+
+## Quick Start
 
 ### Create an instance with desired configuration
 
-```
+```javascript
+import EasyAuth from 'easy-auth';
+
 const easyAuth = EasyAuth({
-secret: 'MY_SUPER_SECRET_KEY',
-    ttl: 1000 * 60 * 60 * 24,
-    name: 'test',
-    onAuth: async (authphrase) => UserRepository.findUserByAuthphrase(authphrase),
-})
-
+  secret: 'MY_SUPER_SECRET_KEY',
+  ttl: 60 * 60 * 24, // 24 hours in seconds
+  name: 'my-app',
+  onAuth: async (authphrase) => {
+    // Lookup user with authphrase in your database
+    return userFromDatabase || null;
+  },
+  onCreate: async (authphrase, data) => {
+    // Create a new user in your database
+    return true; // Return true if successful
+  }
+});
 ```
 
-onAuth is a hook that will be called with an authphrase when a user tries to log in, you are expected to have a method to check the users storage for a user with said authphrase.
+The `onAuth` hook is called with an authphrase when a user tries to log in. You are expected to have a method to check your user storage for a user with this authphrase.
 
-Authphrases are kinda like user ids, authphrases are unique per user login, are constructed with user identifier (email, username, etc) and a password.
-
-onAuth is required to return falsy (false, null, 0, undefined...) if theres no users for the authphrase or a data object,
-this object is the one stored in the JWT and the one you will have back when a user session is verified.
+Authphrases are unique identifiers for users, constructed from the user identifier (email, username, etc.) and a password.
 
 ### Create a login endpoint
 
-```
+```javascript
 app.post('/login', async (req, res) => {
-    const auth = await easyAuth.credentialsAuth(req.body.email, req.body.password)
-    if (!auth) return res.status(401).json({ error: 1 })
-
-    return auth.session(res).status(200).json(auth.data)
-})
+  const userData = await easyAuth.Auth(req.body.email, req.body.password);
+  if (!userData) return res.status(401).json({ error: 'Invalid credentials' });
+  
+  const session = await easyAuth.Session(userData);
+  return session.session(res).status(200).json(userData);
+});
 ```
 
-when a user calls this endpoint, Easy-Auth will try to reach the users repository through the onAuth hook and fetch a data object, if it works, the `.credentialsAuth` method is going 
-to return an object with the data returned by the repo, the token and a `.session` method to set the cookies.
+When a user calls this endpoint, Easy-Auth will try to reach the users repository through the `onAuth` hook and fetch a data object. If successful, the `.Auth` method will return the user data.
 
-Using the session cookie wrapper is recommended but not mandatory.
+The `Session` method creates a JWT token containing the user data, and the `.session(res)` method sets this token as a cookie.
 
 ### Verify your session anywhere
 
-```
-app.patch('/users/:userId', [easyAuth.SessionMiddleware], (req, res) => {
-    if (!req.session || req.session.userId != req.params.userId) return res.status(403).send('Forbidden')
-    ...
-})
-
-```
-
-# API Reference
-
-### EasyAuth <constructor>(config)
-
-** returns easyauth instance **
-
-- secret: used as JWT secret and to generate authphrase salt
-
-- ttl: session expiration in miliseconds, used for both jwt and cookies
-
-- name: project name, used as audience for jwt
-
-- onAuth function(authphrase <string>): repository interaction hook
-
-### easyauth<instance>.credentialsAuth(identificator, password)
-
-this is the simplest auth method, it's used to login users in the system
-
-```
-app.post('/login', (req, res) => {
-    const auth = await easyAuth.credentialsAuth(req.body.email, req.body.password)
-    if (!auth) return res.status(401).json({ error: 1})
-    return res.status(200).set('token', auth.token).json(auth.data)
-})
+```javascript
+app.get('/profile', [easyAuth.SessionMiddleware], (req, res) => {
+  if (!req.session) return res.status(401).json({ error: 'Unauthorized' });
+  return res.json({ user: req.session });
+});
 ```
 
-it returns the data object and generates a JWT token that contains the data
+## API Reference
 
-`return auth.session(res).status(200).json(auth.data)`
+### EasyAuth(config)
 
-also returns a `.session(res <Response>)` method that can be used to wrap API responses with the jwt as a cookie in express
+**Returns an easyAuth instance**
 
-### easyauth<instance>.validateSession(token)
+- `secret`: used as JWT secret and to generate authphrase salt
+- `ttl`: session expiration in seconds (for JWT) or milliseconds (for cookies)
+- `name`: project name, used as audience for JWT
+- `onAuth`: function(authphrase) - repository interaction hook for authentication
+- `onCreate`: function(authphrase, data) - repository interaction hook for user creation
 
-This method can be used to validate if the token is valid and extract it's content
+### easyAuth.Auth(identifier, password)
 
-### easyauth<instance>.SessionMiddleware(req <Request>, res, next)
+Authenticates a user with the given identifier and password.
 
-This is a simple express session middleware that gets the token from either cookies or as authorization bearer token and uses `validateSession` to verify it and return its content
-
+```javascript
+const userData = await easyAuth.Auth('user@example.com', 'password123');
+if (userData) {
+  // Authentication successful
+} else {
+  // Authentication failed
+}
 ```
-app.get('/session', [easyAuth.SessionMiddleware], (req, res) => {
-    res.status(200).json({ status: 'OK', session: req.session })
-})
+
+### easyAuth.Create(identifier, password, data)
+
+Creates a new user account.
+
+```javascript
+const success = await easyAuth.Create('user@example.com', 'password123', { name: 'John Doe' });
+if (success) {
+  // User created successfully
+} else {
+  // User already exists or creation failed
+}
 ```
 
-SessionMiddleware also refreshes the token and cookie ttl
+### easyAuth.Session(data)
+
+Creates a new authenticated session with the given user data.
+
+```javascript
+const session = await easyAuth.Session(userData);
+// Use session.session(res) to set the cookie in an Express response
+return session.session(res).status(200).json(session.data);
+```
+
+### easyAuth.validateSession(token)
+
+Validates a JWT token and returns the decoded payload if valid.
+
+```javascript
+const sessionData = await easyAuth.validateSession(token);
+if (sessionData) {
+  // Token is valid
+} else {
+  // Token is invalid
+}
+```
+
+### easyAuth.SessionMiddleware
+
+Express middleware that validates the session token from cookies or Authorization header and attaches the decoded payload to `req.session`.
+
+```javascript
+app.get('/protected', [easyAuth.SessionMiddleware], (req, res) => {
+  if (!req.session) return res.status(401).json({ error: 'Unauthorized' });
+  return res.json({ user: req.session });
+});
+```
+
+The middleware also automatically refreshes tokens that are nearing expiration.
+
+### easyAuth.Router
+
+Optional Express router that provides authentication endpoints (/auth, /create). This is a quality-of-life feature for Express applications and is not required to use Easy-Auth.
+
+```javascript
+// Mount the router at your desired path
+app.use('/api/auth', easyAuth.Router);
+```
+
+## Documentation
+
+For more detailed documentation, examples, and configuration options, see the [doc directory](./doc).
