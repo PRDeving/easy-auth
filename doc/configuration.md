@@ -70,6 +70,13 @@ Time window in seconds before token expiration when tokens should be refreshed.
 refresh: 60 // 60 seconds
 ```
 
+### inputPattern
+Regular expression pattern used to validate user input. This helps prevent injection attacks by ensuring all user input matches the expected format. Defaults to a pattern that allows alphanumeric characters, hyphens, underscores, equals signs, and periods (compatible with JWT tokens).
+
+```javascript
+inputPattern: /^[A-Za-z0-9-_=.]+$/
+```
+
 ## Hooks
 
 ### onAuth(authphrase)
