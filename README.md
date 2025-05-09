@@ -1,3 +1,6 @@
+> [!IMPORTANT] 
+> For extensive documentation visit https://deepwiki.com/PRDeving/easy-auth
+
 # EASY-AUTH
 
 Easy-Auth is a lightweight authentication library for Node.js applications that simplifies user authentication using passwords. It provides a flexible and configurable system for handling authentication tokens, sessions, and user management.
