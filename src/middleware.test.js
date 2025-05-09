@@ -38,7 +38,7 @@ describe('Auth Middleware', () => {
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 
     expect(verifyToken).toHaveBeenCalledWith('validToken', config)
-    expect(mockReq.session).toEqual(decoded)
+    expect(mockReq.session).toEqual({ userId: 1 })
     expect(mockNext).toHaveBeenCalled()
   })
 
@@ -54,7 +54,7 @@ describe('Auth Middleware', () => {
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 
     expect(verifyToken).toHaveBeenCalledWith('validToken', config)
-    expect(mockReq.session).toEqual(decoded)
+    expect(mockReq.session).toEqual({ userId: 1 })
     expect(mockNext).toHaveBeenCalled()
   })
 
@@ -64,7 +64,6 @@ describe('Auth Middleware', () => {
     generateToken.mockResolvedValue('freshToken')
 
     mockReq.headers.authorization = 'Bearer tokenNearExpiry'
-    mockReq.session = decoded
 
     const config = { secret: 'secret', ttl: 3600, refresh: 300, audience: 'testApp', issuer: 'issuer' }
 
