@@ -1,5 +1,7 @@
 > [!IMPORTANT] 
-> For extensive documentation visit https://deepwiki.com/PRDeving/easy-auth
+> For extensive documentation [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/PRDeving/easy-auth)
+
+
 
 # EASY-AUTH
 
