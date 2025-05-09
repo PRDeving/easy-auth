@@ -11,7 +11,9 @@ export const generateToken = (data, config) => new Promise((res) => {
 })
 
 export const verifyToken = (token, config) => new Promise((res, rej) => {
-    const sanitizedToken = sanitizeToken(token)
+    const sanitizedToken = config.sanitization?.enabled && config.sanitization?.sanitizeTokens 
+        ? sanitizeToken(token) 
+        : token
     if (!sanitizedToken) return rej(new Error('Invalid token format'))
     
     jwt.verify(sanitizedToken, config.secret, {

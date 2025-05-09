@@ -7,7 +7,9 @@ export default (config) => async (req, res, next) => {
     if (!tokenStr) return next()
     
     let rawToken = (tokenStr.startsWith('Bearer')) ? tokenStr.split(' ')[1] : tokenStr
-    const token = sanitizeToken(rawToken)
+    const token = config.sanitization?.enabled && config.sanitization?.sanitizeTokens 
+        ? sanitizeToken(rawToken) 
+        : rawToken
 
     try {
         const decoded = await verifyToken(token, config)

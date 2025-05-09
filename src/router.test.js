@@ -23,6 +23,12 @@ it('debe responder con un token para una autenticación exitosa', async () => {
         ttl: 3600,
         name: 'testApp',
         issuer: 'testIssuer',
+        sanitization: {
+            enabled: true,
+            sanitizeRequestBody: true,
+            sanitizeTokens: true,
+            patterns: []
+        },
         onAuth: async () => ({ userId: 1 })
     }))
 
@@ -39,8 +45,6 @@ it('debe responder con un token para una autenticación exitosa', async () => {
     expect(response.statusCode).toBe(200)
     expect(response.body).toEqual({ userId: 1 })
     expect(sanitizeObject).toHaveBeenCalled()
-    expect(sanitizeString).toHaveBeenCalledWith('user')
-    expect(sanitizeString).toHaveBeenCalledWith('password')
     expect(generateToken).toHaveBeenCalledWith({ userId: 1 }, expect.any(Object))
     expect(response.headers['set-cookie']).toBeDefined()
 })

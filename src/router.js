@@ -9,14 +9,16 @@ export default (config) => {
     const router = Router()
 
     router.post('/create', async (req, res) => {
-        const sanitizedBody = sanitizeObject(req.body)
+        const sanitizationEnabled = config.sanitization?.enabled && config.sanitization?.sanitizeRequestBody;
+        const patterns = sanitizationEnabled ? config.sanitization?.patterns : null;
+        
+        const sanitizedBody = sanitizationEnabled 
+            ? sanitizeObject(req.body, patterns) 
+            : req.body;
+            
         const { identifier, password } = sanitizedBody
         
-        const authphrase = generateAuthphrase(
-            sanitizeString(identifier), 
-            sanitizeString(password), 
-            config.secret
-        )
+        const authphrase = generateAuthphrase(identifier, password, config.secret)
         
         const success = await config.onCreate(authphrase, sanitizedBody)
         if (!success) return res.status(400).json({ error: 'Invalid request' })
@@ -35,14 +37,16 @@ export default (config) => {
     })
 
     router.post('/auth', async (req, res) => {
-        const sanitizedBody = sanitizeObject(req.body)
+        const sanitizationEnabled = config.sanitization?.enabled && config.sanitization?.sanitizeRequestBody;
+        const patterns = sanitizationEnabled ? config.sanitization?.patterns : null;
+        
+        const sanitizedBody = sanitizationEnabled 
+            ? sanitizeObject(req.body, patterns) 
+            : req.body;
+            
         const { identifier, password } = sanitizedBody
         
-        const authphrase = generateAuthphrase(
-            sanitizeString(identifier), 
-            sanitizeString(password), 
-            config.secret
-        )
+        const authphrase = generateAuthphrase(identifier, password, config.secret)
         
         const data = await config.onAuth(authphrase)
         if (!data) return res.status(401).json({ error: 'Invalid token' })

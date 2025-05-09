@@ -39,7 +39,17 @@ describe('Auth Middleware', () => {
 
     mockReq.headers.authorization = 'Bearer validToken'
 
-    const config = { secret: 'secret', ttl: 3600, refresh: 300, name: 'testApp', issuer: 'issuer' }
+    const config = { 
+      secret: 'secret', 
+      ttl: 3600, 
+      refresh: 300, 
+      name: 'testApp', 
+      issuer: 'issuer',
+      sanitization: {
+        enabled: true,
+        sanitizeTokens: true
+      }
+    }
 
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 
@@ -56,7 +66,17 @@ describe('Auth Middleware', () => {
 
     mockReq.cookies.eat = 'validToken'
 
-    const config = { secret: 'secret', ttl: 3600, refresh: 300, name: 'testApp', issuer: 'issuer' }
+    const config = { 
+      secret: 'secret', 
+      ttl: 3600, 
+      refresh: 300, 
+      name: 'testApp', 
+      issuer: 'issuer',
+      sanitization: {
+        enabled: true,
+        sanitizeTokens: true
+      }
+    }
 
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 
@@ -91,7 +111,17 @@ describe('Auth Middleware', () => {
 
     mockReq.headers.authorization = 'Bearer invalidToken'
 
-    const config = { secret: 'secret', ttl: 3600, refresh: 300, name: 'testApp', issuer: 'issuer' }
+    const config = { 
+      secret: 'secret', 
+      ttl: 3600, 
+      refresh: 300, 
+      name: 'testApp', 
+      issuer: 'issuer',
+      sanitization: {
+        enabled: true,
+        sanitizeTokens: true
+      }
+    }
 
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 

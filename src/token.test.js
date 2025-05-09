@@ -32,7 +32,13 @@ describe('verifyToken', () => {
     jwt.verify.mockImplementationOnce((token, secret, options, callback) => callback(null, mockDecoded))
     sanitizeToken.mockReturnValueOnce('sanitized-token')
 
-    const decoded = await verifyToken('token', { secret: 'secret' })
+    const decoded = await verifyToken('token', { 
+      secret: 'secret',
+      sanitization: {
+        enabled: true,
+        sanitizeTokens: true
+      }
+    })
 
     expect(sanitizeToken).toHaveBeenCalledWith('token')
     expect(jwt.verify).toHaveBeenCalledWith('sanitized-token', 'secret', expect.any(Object), expect.any(Function))
@@ -42,7 +48,13 @@ describe('verifyToken', () => {
   it('Should return error if invalid token format', async () => {
     sanitizeToken.mockReturnValueOnce(null)
 
-    await expect(verifyToken('invalid-token', { secret: 'secret' })).rejects.toThrow('Invalid token format')
+    await expect(verifyToken('invalid-token', { 
+      secret: 'secret',
+      sanitization: {
+        enabled: true,
+        sanitizeTokens: true
+      }
+    })).rejects.toThrow('Invalid token format')
   })
 
   it('Should return error if jwt verification fails', async () => {
