@@ -10,7 +10,14 @@ export default {
     sanitization: {
         enabled: true,
         sanitizeRequestBody: true,
-        sanitizeTokens: true
+        sanitizeTokens: true,
+        patterns: [
+            { pattern: /<script[^>]*>[\s\S]*?<\/script>/gi, replacement: '' },
+            { pattern: /<[^>]*on\w+\s*=\s*["']?[^"']*["']?[^>]*>/gi, replacement: '' },
+            { pattern: /<\s*iframe[^>]*>[\s\S]*?<\s*\/\s*iframe\s*>/gi, replacement: '' },
+            { pattern: /javascript\s*:/gi, replacement: 'removed:' },
+            { pattern: /data\s*:/gi, replacement: 'removed:' }
+        ]
     },
 
     onCreate: () => console.log('You need to configure a backend for user creation: fn(authphrase, data): boolean'),

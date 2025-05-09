@@ -33,7 +33,18 @@ Configuration options for input sanitization. All user inputs are automatically 
 sanitization: {
   enabled: true, // Whether to enable input sanitization
   sanitizeRequestBody: true, // Whether to sanitize request body data
-  sanitizeTokens: true // Whether to validate and sanitize JWT tokens
+  sanitizeTokens: true, // Whether to validate and sanitize JWT tokens
+  patterns: [ // Array of regex patterns and replacements for string sanitization
+    { 
+      pattern: /<script[^>]*>[\s\S]*?<\/script>/gi, // Regex pattern to match
+      replacement: '' // Replacement string
+    },
+    { 
+      pattern: /<[^>]*on\w+\s*=\s*["']?[^"']*["']?[^>]*>/gi, 
+      replacement: '' 
+    },
+    // Add more patterns as needed
+  ]
 }
 ```
 

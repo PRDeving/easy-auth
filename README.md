@@ -78,6 +78,7 @@ app.get('/profile', [easyAuth.SessionMiddleware], (req, res) => {
   - `enabled`: whether to enable input sanitization
   - `sanitizeRequestBody`: whether to sanitize request body data
   - `sanitizeTokens`: whether to validate and sanitize JWT tokens
+  - `patterns`: array of regex patterns and replacements for string sanitization
 
 ### easyAuth.Auth(identifier, password)
 

@@ -112,17 +112,24 @@ Easy-Auth is built around several internal components that work together to prov
 
 ### Input Sanitization
 
-Prevents security vulnerabilities by sanitizing all user inputs.
+Prevents security vulnerabilities by sanitizing all user inputs using configurable regex patterns.
 
 ```javascript
 // Internal usage
 import { sanitizeString, sanitizeObject, sanitizeToken } from './sanitize.js';
 
-// Sanitize a string to prevent XSS
+// Sanitize a string to prevent XSS using default HTML escaping
 const sanitizedInput = sanitizeString('<script>alert("XSS")</script>');
 
+// Sanitize a string using custom regex patterns
+const patterns = [
+  { pattern: /<script[^>]*>[\s\S]*?<\/script>/gi, replacement: '' },
+  { pattern: /<[^>]*on\w+\s*=\s*["']?[^"']*["']?[^>]*>/gi, replacement: '' }
+];
+const sanitizedWithPatterns = sanitizeString('<script>alert("XSS")</script>', patterns);
+
 // Sanitize an object with nested properties
-const sanitizedData = sanitizeObject({ name: '<script>alert("XSS")</script>' });
+const sanitizedData = sanitizeObject({ name: '<script>alert("XSS")</script>' }, patterns);
 
 // Validate and sanitize a JWT token
 const sanitizedToken = sanitizeToken(token);

@@ -2,11 +2,22 @@ import { sanitizeString, sanitizeObject, sanitizeToken } from './sanitize.js';
 
 describe('Sanitize Utilities', () => {
   describe('sanitizeString', () => {
-    it('should sanitize strings with potential XSS content', () => {
+    it('should sanitize strings with potential XSS content using default method', () => {
       const input = '<script>alert("XSS")</script>';
       const expected = '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;';
       const actual = sanitizeString(input);
       expect(actual).toBe(expected);
+    });
+    
+    it('should sanitize strings using custom regex patterns', () => {
+      const input = '<script>alert("XSS")</script><img src="x" onerror="alert(1)">';
+      const patterns = [
+        { pattern: /<script[^>]*>[\s\S]*?<\/script>/gi, replacement: '' },
+        { pattern: /<[^>]*on\w+\s*=\s*["']?[^"']*["']?[^>]*>/gi, replacement: '' }
+      ];
+      
+      const actual = sanitizeString(input, patterns);
+      expect(actual).toBe('');
     });
 
     it('should handle null and undefined values', () => {
@@ -21,7 +32,7 @@ describe('Sanitize Utilities', () => {
   });
 
   describe('sanitizeObject', () => {
-    it('should sanitize all string properties in an object', () => {
+    it('should sanitize all string properties in an object using default method', () => {
       const input = {
         name: '<script>alert("XSS")</script>',
         age: 30,
@@ -36,6 +47,29 @@ describe('Sanitize Utilities', () => {
       expect(sanitized.name).toBe('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
       expect(sanitized.age).toBe(30);
       expect(sanitized.nested.bio).toBe('&lt;img src=&quot;x&quot; onerror=&quot;alert(1)&quot;&gt;');
+      expect(sanitized.nested.active).toBe(true);
+    });
+    
+    it('should sanitize all string properties in an object using custom regex patterns', () => {
+      const input = {
+        name: '<script>alert("XSS")</script>',
+        age: 30,
+        nested: {
+          bio: '<img src="x" onerror="alert(1)">',
+          active: true
+        }
+      };
+      
+      const patterns = [
+        { pattern: /<script[^>]*>[\s\S]*?<\/script>/gi, replacement: '' },
+        { pattern: /<[^>]*on\w+\s*=\s*["']?[^"']*["']?[^>]*>/gi, replacement: '' }
+      ];
+      
+      const sanitized = sanitizeObject(input, patterns);
+      
+      expect(sanitized.name).toBe('');
+      expect(sanitized.age).toBe(30);
+      expect(sanitized.nested.bio).toBe('');
       expect(sanitized.nested.active).toBe(true);
     });
 

@@ -12,11 +12,20 @@ const EasyAuth = (_config) => {
     const config = { ...defaultConfig, ..._config, ...process.env }
 
     return ({
-        generateAuthphrase: (identifier, password) => generateAuthphrase(
-            sanitizeString(identifier), 
-            sanitizeString(password), 
-            config.secret
-        ),
+        generateAuthphrase: (identifier, password) => {
+            const sanitizationEnabled = config.sanitization?.enabled;
+            const patterns = sanitizationEnabled ? config.sanitization?.patterns : null;
+            
+            const sanitizedIdentifier = sanitizationEnabled 
+                ? sanitizeString(identifier, patterns) 
+                : identifier;
+                
+            const sanitizedPassword = sanitizationEnabled 
+                ? sanitizeString(password, patterns) 
+                : password;
+                
+            return generateAuthphrase(sanitizedIdentifier, sanitizedPassword, config.secret);
+        },
         validateSession: async (token) => verifyToken(token, config),
         SessionMiddleware: Middleware(config),
         Router: Router(config),
