@@ -26,7 +26,7 @@ const easyAuth = EasyAuth({
 
 ### generateAuthphrase(identifier, password)
 
-Generates an authentication phrase from identifier (usually username or email) and password.
+Generates an authentication phrase from identifier (usually username or email) and password. All inputs are automatically sanitized to prevent security vulnerabilities.
 
 ```javascript
 const authphrase = easyAuth.generateAuthphrase('user@example.com', 'password123');
@@ -67,7 +67,7 @@ app.use('/api/auth', easyAuth.Router);
 
 ### Create(identifier, password, data)
 
-Creates a new user account.
+Creates a new user account. All inputs are automatically sanitized to prevent security vulnerabilities such as XSS attacks.
 
 ```javascript
 const newUser = await easyAuth.Create('user@example.com', 'password123', { name: 'John Doe' });
@@ -80,7 +80,7 @@ if (newUser) {
 
 ### Auth(identifier, password)
 
-Authenticates a user with identifier and password.
+Authenticates a user with identifier and password. All inputs are automatically sanitized to prevent security vulnerabilities.
 
 ```javascript
 const userData = await easyAuth.Auth('user@example.com', 'password123');
@@ -109,6 +109,24 @@ return session.session(res).status(200).json(session.data);
 ## Internal Components
 
 Easy-Auth is built around several internal components that work together to provide authentication functionality:
+
+### Input Sanitization
+
+Prevents security vulnerabilities by sanitizing all user inputs.
+
+```javascript
+// Internal usage
+import { sanitizeString, sanitizeObject, sanitizeToken } from './sanitize.js';
+
+// Sanitize a string to prevent XSS
+const sanitizedInput = sanitizeString('<script>alert("XSS")</script>');
+
+// Sanitize an object with nested properties
+const sanitizedData = sanitizeObject({ name: '<script>alert("XSS")</script>' });
+
+// Validate and sanitize a JWT token
+const sanitizedToken = sanitizeToken(token);
+```
 
 ### Token Management
 

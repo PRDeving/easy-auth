@@ -1,6 +1,7 @@
 import authMiddleware from './middleware.js'
 import { generateToken, verifyToken } from './token.js'
 import cookie from './cookie.js'
+import { sanitizeToken } from './sanitize.js'
 
 jest.mock('./token.js', () => ({
   generateToken: jest.fn(),
@@ -8,6 +9,10 @@ jest.mock('./token.js', () => ({
 }))
 
 jest.mock('./cookie.js', () => jest.fn())
+
+jest.mock('./sanitize.js', () => ({
+  sanitizeToken: jest.fn(token => token),
+}))
 
 describe('Auth Middleware', () => {
   let mockReq, mockRes, mockNext
@@ -27,9 +32,10 @@ describe('Auth Middleware', () => {
     expect(mockReq.session).not.toBeTruthy()
   })
 
-  it('should berify and set req.session if token as bearer is valid', async () => {
+  it('should verify and set req.session if token as bearer is valid', async () => {
     const decoded = { iat: Math.floor(Date.now() / 1000) - 100, userId: 1 }
     verifyToken.mockResolvedValue(decoded)
+    sanitizeToken.mockReturnValue('validToken')
 
     mockReq.headers.authorization = 'Bearer validToken'
 
@@ -37,6 +43,7 @@ describe('Auth Middleware', () => {
 
     await authMiddleware(config)(mockReq, mockRes, mockNext)
 
+    expect(sanitizeToken).toHaveBeenCalledWith('validToken')
     expect(verifyToken).toHaveBeenCalledWith('validToken', config)
     expect(mockReq.session).toEqual({ userId: 1 })
     expect(mockNext).toHaveBeenCalled()

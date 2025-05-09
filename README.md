@@ -74,6 +74,10 @@ app.get('/profile', [easyAuth.SessionMiddleware], (req, res) => {
 - `name`: project name, used as audience for JWT
 - `onAuth`: function(authphrase) - repository interaction hook for authentication
 - `onCreate`: function(authphrase, data) - repository interaction hook for user creation
+- `sanitization`: object with sanitization options (all enabled by default)
+  - `enabled`: whether to enable input sanitization
+  - `sanitizeRequestBody`: whether to sanitize request body data
+  - `sanitizeTokens`: whether to validate and sanitize JWT tokens
 
 ### easyAuth.Auth(identifier, password)
 

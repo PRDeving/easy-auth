@@ -19,8 +19,9 @@ Easy-Auth serves developers building Node.js applications (particularly Express-
 3. Manage user sessions with automatic token refresh
 4. Protect routes with authentication middleware
 5. Integrate with any user data storage mechanism through hooks
+6. Automatically sanitize all user inputs to prevent security vulnerabilities
 
-The library is designed to be minimalistic yet secure, allowing developers to implement authentication with minimal code while maintaining flexibility to customize the authentication flow to their needs.
+The library is designed to be minimalistic yet secure, allowing developers to implement authentication with minimal code while maintaining flexibility to customize the authentication flow to their needs. All user inputs are automatically sanitized to prevent common security vulnerabilities like XSS attacks.
 
 ## Getting Started
 

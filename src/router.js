@@ -3,14 +3,22 @@ import { Router } from 'express'
 import cookie from './cookie.js'
 import { generateToken, verifyToken } from './token.js'
 import { generateAuthphrase } from './auth.js'
+import { sanitizeString, sanitizeObject } from './sanitize.js'
 
 export default (config) => {
     const router = Router()
 
     router.post('/create', async (req, res) => {
-        const { identifier, password } = req.body
-        const authphrase = generateAuthphrase(identifier, password, config.secret)
-        const success = await config.onCreate(authphrase, req.body)
+        const sanitizedBody = sanitizeObject(req.body)
+        const { identifier, password } = sanitizedBody
+        
+        const authphrase = generateAuthphrase(
+            sanitizeString(identifier), 
+            sanitizeString(password), 
+            config.secret
+        )
+        
+        const success = await config.onCreate(authphrase, sanitizedBody)
         if (!success) return res.status(400).json({ error: 'Invalid request' })
 
         const data = await config.onAuth(authphrase)
@@ -27,8 +35,15 @@ export default (config) => {
     })
 
     router.post('/auth', async (req, res) => {
-        const { identifier, password } = req.body
-        const authphrase = generateAuthphrase(identifier, password, config.secret)
+        const sanitizedBody = sanitizeObject(req.body)
+        const { identifier, password } = sanitizedBody
+        
+        const authphrase = generateAuthphrase(
+            sanitizeString(identifier), 
+            sanitizeString(password), 
+            config.secret
+        )
+        
         const data = await config.onAuth(authphrase)
         if (!data) return res.status(401).json({ error: 'Invalid token' })
 

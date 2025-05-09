@@ -1,13 +1,20 @@
 import jwt from 'jsonwebtoken'
+import { sanitizeObject, sanitizeToken } from './sanitize.js'
 
-export const generateToken = (data, config) => new Promise((res) => res(jwt.sign(data, config.secret, {
-    expiresIn: config.expiresIn,
-    audience: config.audience,
-    issuer: config.issuer,
-})))
+export const generateToken = (data, config) => new Promise((res) => {
+    const sanitizedData = sanitizeObject(data)
+    return res(jwt.sign(sanitizedData, config.secret, {
+        expiresIn: config.expiresIn,
+        audience: config.audience,
+        issuer: config.issuer,
+    }))
+})
 
 export const verifyToken = (token, config) => new Promise((res, rej) => {
-    jwt.verify(token, config.secret,{
+    const sanitizedToken = sanitizeToken(token)
+    if (!sanitizedToken) return rej(new Error('Invalid token format'))
+    
+    jwt.verify(sanitizedToken, config.secret, {
         audience: config.audience,
         issuer: config.issuer,
     }, (err, decoded) => {

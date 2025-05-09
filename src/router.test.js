@@ -3,10 +3,16 @@ import request from 'supertest'
 
 import authRouter from './router.js'
 import { generateToken, verifyToken, generateAuthphrase } from './token.js'
+import { sanitizeString, sanitizeObject } from './sanitize.js'
 
 jest.mock('./token.js', () => ({
     generateToken: jest.fn(),
     generateAuthphrase: jest.fn(),
+}))
+
+jest.mock('./sanitize.js', () => ({
+    sanitizeString: jest.fn(str => str),
+    sanitizeObject: jest.fn(obj => obj),
 }))
 
 it('debe responder con un token para una autenticación exitosa', async () => {
@@ -22,6 +28,8 @@ it('debe responder con un token para una autenticación exitosa', async () => {
 
     generateAuthphrase.mockReturnValue('authPhraseMock')
     generateToken.mockResolvedValue('tokenMock')
+    sanitizeObject.mockImplementation(obj => obj)
+    sanitizeString.mockImplementation(str => str)
 
     const response = await request(app).post('/auth').send({
         identifier: 'user',
@@ -30,6 +38,9 @@ it('debe responder con un token para una autenticación exitosa', async () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.body).toEqual({ userId: 1 })
+    expect(sanitizeObject).toHaveBeenCalled()
+    expect(sanitizeString).toHaveBeenCalledWith('user')
+    expect(sanitizeString).toHaveBeenCalledWith('password')
     expect(generateToken).toHaveBeenCalledWith({ userId: 1 }, expect.any(Object))
     expect(response.headers['set-cookie']).toBeDefined()
 })

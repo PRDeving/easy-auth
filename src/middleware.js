@@ -1,10 +1,13 @@
 import { generateToken, verifyToken } from './token.js'
 import cookie from './cookie.js'
+import { sanitizeToken } from './sanitize.js'
 
 export default (config) => async (req, res, next) => {
     const tokenStr = req.cookies?.eat || req.headers.authorization
     if (!tokenStr) return next()
-    const token = (tokenStr.startsWith('Bearer')) ? tokenStr.split(' ')[1] : tokenStr
+    
+    let rawToken = (tokenStr.startsWith('Bearer')) ? tokenStr.split(' ')[1] : tokenStr
+    const token = sanitizeToken(rawToken)
 
     try {
         const decoded = await verifyToken(token, config)

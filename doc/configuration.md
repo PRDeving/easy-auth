@@ -13,6 +13,11 @@ Easy-Auth can be configured with various options to customize its behavior.
   issuer: 'easy-auth',
   ttl: 60 * 60 * 24, // 24 hours in seconds
   refresh: 60, // 60 seconds
+  sanitization: {
+    enabled: true,
+    sanitizeRequestBody: true,
+    sanitizeTokens: true
+  },
 
   onCreate: () => console.log('You need to configure a backend for user creation: fn(authphrase, data): boolean'),
   onAuth: () => console.log('You need to configure a backend for user auth: fn(authphrase): User'),
@@ -20,6 +25,17 @@ Easy-Auth can be configured with various options to customize its behavior.
 ```
 
 ## Options
+
+### sanitization
+Configuration options for input sanitization. All user inputs are automatically sanitized to prevent security vulnerabilities like XSS attacks.
+
+```javascript
+sanitization: {
+  enabled: true, // Whether to enable input sanitization
+  sanitizeRequestBody: true, // Whether to sanitize request body data
+  sanitizeTokens: true // Whether to validate and sanitize JWT tokens
+}
+```
 
 ### name
 Project name, used as audience for JWT if audience is not specified.
@@ -124,6 +140,11 @@ const easyAuth = EasyAuth({
   audience: 'my-app-audience',
   issuer: 'my-app-issuer',
   refresh: 300, // 5 minutes
+  sanitization: {
+    enabled: true,
+    sanitizeRequestBody: true,
+    sanitizeTokens: true
+  },
   onAuth: async (authphrase) => {
     // Lookup user with authphrase in your database
     return userFromDatabase || null;
