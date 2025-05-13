@@ -1,6 +1,7 @@
 import authMiddleware from './middleware.js'
 import { generateToken, verifyToken } from './token.js'
 import cookie from './cookie.js'
+import { sanitizeInput } from './sanitize.js'
 
 jest.mock('./token.js', () => ({
   generateToken: jest.fn(),
@@ -8,6 +9,10 @@ jest.mock('./token.js', () => ({
 }))
 
 jest.mock('./cookie.js', () => jest.fn())
+
+jest.mock('./sanitize.js', () => ({
+  sanitizeInput: jest.fn(input => input),
+}))
 
 describe('Auth Middleware', () => {
   let mockReq, mockRes, mockNext
